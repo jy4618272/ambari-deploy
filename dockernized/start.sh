@@ -4,8 +4,8 @@ docker exec -t -i  as  /etc/init.d/ssh restart
 
 
 docker run  -d -t  --name "ag1" -h "ag1"  trumanz/ambari:dev     /bin/bash
+docker exec -t -i  ag1  sed -i  "s/hostname=*/hostname=as" /etc/ambari-agent/conf/ambari-agent.ini
 docker exec -t -i  ag1  /etc/init.d/ssh restart
-
 
 ASIP=$(docker inspect -f  '{{.NetworkSettings.IPAddress}}' as)
 AG1IP=$(docker inspect -f  '{{.NetworkSettings.IPAddress}}' ag1)
