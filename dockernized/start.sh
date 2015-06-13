@@ -1,26 +1,30 @@
 #!/bin/bash
 
-AGENT_NUM=5
+CONTAINERS="
+as
+ag1
+ag2
+ag3"
 
+for c in $CONTAINERS; do 
+   echo $c
+   docker rm -f $c
+   docker run  -d -t  --name "$c" -h "$c"    trumanz/ambari:dev   /bin/bash
+   docker exec -t -i  $c  /etc/init.d/ssh restart
+done
 
-
-docker run  -d -t  --name "as" -h "as"    trumanz/ambari:dev   /bin/bash
-docker exec -t -i  as  /etc/init.d/ssh restart
-
-
-docker run  -d -t  --name "ag1" -h "ag1"  trumanz/ambari:dev     /bin/bash
-docker exec -t -i  ag1  sed -i  "s/hostname=.*/hostname=as/g" /etc/ambari-agent/conf/ambari-agent.ini
-docker exec -t -i  ag1  /etc/init.d/ssh restart
-
-ASIP=$(docker inspect -f  '{{.NetworkSettings.IPAddress}}' as)
-AG1IP=$(docker inspect -f  '{{.NetworkSettings.IPAddress}}' ag1)
-
-docker exec -t -i  as   bash -c  "echo '$AG1IP  ag1'  >>   /etc/hosts"
-docker exec -t -i  ag1  bash -c  "echo '$ASIP  as'  >>   /etc/hosts "
+for c in $CONTAINERS; do 
+    ip=$(docker inspect -f  '{{.NetworkSettings.IPAddress}}' $c)
+    echo "$c : $ip"   
+    for c2 in $CONTAINERS; do 
+        docker exec -t -i  $c2   bash -c  "echo '$ip  $c'  >>   /etc/hosts"
+    done
+done
+    
 
 docker exec -t -i  as  bash -c "cd /usr/lib/ambari-server/web/javascripts/ && gunzip app.js.gz  && sed -i.bak \"s@].contains(mPoint@, '/etc/resolv.conf', '/etc/hostname', '/etc/hosts'].contains(mPoint@g\" /usr/lib/ambari-server/web/javascripts/app.js  && cd /usr/lib/ambari-server/web/javascripts/ && gzip -9 app.js"
 
 docker exec -t -i  as   ambari-server setup -s  -j /usr/lib/jvm/java-7-openjdk-amd64/  
-docker exec -t -i  as   ambari-server start 
+docker exec -t -i  as   bash -c "ambari-server start"
 
 echo "Try http://$ASIP:8080 with admin:admin on firefox" 
