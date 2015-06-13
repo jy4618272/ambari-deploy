@@ -9,7 +9,7 @@ ag3"
 for c in $CONTAINERS; do 
    echo $c
    docker rm -f $c
-   docker run  -m 4g -d -t  --name "$c" -h "$c"    trumanz/ambari:dev   /bin/bash
+   docker run   -d -t  --name "$c" -h "$c"    trumanz/ambari:dev   /bin/bash
    docker exec -t -i  $c  /etc/init.d/ssh restart
 done
 
