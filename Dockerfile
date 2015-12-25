@@ -1,5 +1,4 @@
 From  trumanz/ubuntu14.04-dev
-
 maintainer  Truman Zhou <truman.ck.zhou@gmail.com>
 
 RUN  wget -nv http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.2.0.0/ambari.list -O /etc/apt/sources.list.d/ambari.list  \
